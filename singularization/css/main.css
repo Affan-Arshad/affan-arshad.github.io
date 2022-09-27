@@ -1,0 +1,72 @@
+@font-face {
+    font-family: MV_Waheed;
+    src: url(./MV_Waheed.otf);
+}
+
+/* Move Substitue Out */
+@keyframes SubOut {
+    0% {top: 0px;}
+    25% {top: 0px;}
+    75% {top: -90px;}
+    100% {top: -90px;}
+}
+
+/* Move Substitue In */
+@keyframes SubIn {
+    0% {top: 90px;}
+    25% {top: 90px;}
+    75% {top: 0px;}
+    100% {top: 0px;}
+}
+
+.animate-word {
+    position: relative;
+    font-family: MV_Waheed;
+    font-size: 60px;
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+}
+.substitutable {
+    color: red;
+    position: absolute;
+    top: 0;
+    animation-name: SubOut;
+}
+.substitute {
+    color: green;
+    position: absolute;
+    top: 90px;
+    animation-name: SubIn;
+}
+.animateInOut {
+    animation-duration: 2s;
+    animation-timing-function: linear;
+    animation-direction: alternate;
+    animation-iteration-count: infinite;
+}
+
+
+
+/* Move Substitue Out */
+@keyframes SubOut2 {
+    0% {opacity: 1;}
+    25% {opacity: 1;}
+    75% {opacity: 0;}
+    100% {opacity: 0;}
+}
+
+/* Move Substitue In */
+@keyframes SubIn2 {
+    0% {opacity: 0;}
+    25% {opacity: 0;}
+    75% {opacity: 1;}
+    100% {opacity: 1;}
+}
+.v2 .substitutable {
+    animation-name: SubOut2;
+}
+.v2 .substitute {
+    top: 0;
+    opacity: 0;
+    animation-name: SubIn2;
+}

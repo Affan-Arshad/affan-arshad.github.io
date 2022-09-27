@@ -1,4 +1,4 @@
-importScripts('../../dictionary.js');
+importScripts('../dictionary.js');
 const calculations = {
     dictionaryIndex: null,
     subDictionary: null,

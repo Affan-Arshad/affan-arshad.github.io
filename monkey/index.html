@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite monkey theorem</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            padding: 5px;
+        }
+
+        #target,
+        #possibilities {
+            display: block;
+            /* width: 100%; */
+            width: 250px;
+            padding: 5px;
+        }
+
+        #hits {
+            height: 70vh;
+            overflow-y: scroll;
+        }
+
+        body {
+            margin-top: 20px;
+        }
+
+        body>div {
+            margin-bottom: 20px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div>
+        Possible Characters
+        <textarea id="possibilities" onchange="calculateMathematicalProbability()"></textarea>
+    </div>
+    <div>
+        Target:
+        <textarea id="target" onchange="calculateMathematicalProbability()"></textarea>
+    </div>
+    <div>Mathematical Probability: <span id="prob"></span></div>
+    <div>
+        <button onclick="checkCount()">Refresh Total Tries: </button> <span id="count"></span><br>
+    </div>
+
+    <div id="hits"></div>
+
+    <!-- template -->
+    <div class="hit template">
+        <span class="count"></span><br>
+    </div>
+
+    <script>
+        let data = {
+            target: "",
+            tries: 0,
+            hits: 0,
+            possibilities: ""
+        }
+        possibilities.value = " ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        target.value = "HELLO";
+        calculateMathematicalProbability();
+
+        const hitTemplate = document.querySelector('.hit.template');
+        hitTemplate.remove();
+
+        const worker = new Worker('worker.js');
+
+        let generatedWord = "";
+
+        function calculateMathematicalProbability() {
+            data.target = target.value;
+            data.possibilities = [...possibilities.value];
+            let probability = 1;
+            for (const index in data.target) {
+                const letter = data.target[index];
+                const possibilityCount = data.possibilities.filter(x => x == letter).length;
+                const curProbability = possibilityCount / data.possibilities.length;
+                probability = probability * curProbability;
+            }
+            const oneInX = 1 / probability;
+            prob.textContent = "1 in " + Intl.NumberFormat().format(oneInX);
+        }
+
+        function checkCount() {
+            count.textContent = Intl.NumberFormat().format(data.tries) + " total tries for '" + data.target + "' with " + data.hits + " hits";
+        }
+
+        worker.postMessage(data);
+        worker.onmessage = (e) => {
+            // check if target word has changed
+            if (e.data.target != data.target || JSON.stringify(e.data.possibilities) != JSON.stringify(data.possibilities)) {
+                // reset total tries
+                data.tries = 0;
+                data.hits = 0;
+                hits.textContent = "";
+
+                // reset tries count of worker
+                const dataWithTriesReset = e.data;
+                dataWithTriesReset.tries = 0;
+                // change target
+                dataWithTriesReset.target = data.target;
+                dataWithTriesReset.possibilities = data.possibilities;
+                // go again
+                worker.postMessage(dataWithTriesReset);
+                return;
+            }
+
+            generatedWord = e.data.word;
+
+            // increment main tries count
+            data.tries++;
+            // checkCount();
+
+            if (generatedWord != data.target) {
+                worker.postMessage(e.data);
+            }
+            else {
+                data.hits++;
+                // add 'hit' to dom
+                const hit = hitTemplate.cloneNode(true);
+                const count = hit.querySelector('.count');
+                count.textContent = "'" + e.data.target + "' in " + Intl.NumberFormat().format(e.data.tries) + " tries";
+                hits.prepend(hit);
+                // reset tries count of worker
+                const dataWithTriesReset = e.data;
+                dataWithTriesReset.tries = 0;
+                // go again
+                worker.postMessage(dataWithTriesReset);
+            }
+        }
+    </script>
+</body>
+
+</html>
